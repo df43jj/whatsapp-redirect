@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>正在跳轉（DEBUG 版）…</title>
+
+  <!-- X (Twitter) Website Tag - Base -->
+  <script>
+  !function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):
+  s.queue.push(arguments);},s.version='1.1',s.queue=[],u=t.createElement(n),
+  u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',
+  a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');
+  twq('config','q1c3c'); /* 你的 Pixel ID */
+  console.log('[DEBUG] Base pixel configured with ID: q1c3c');
+  </script>
+
+  <style>
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans TC","PingFang TC","Heiti TC",sans-serif;background:#fff;color:#111}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+    a{word-break:break-all}
+    .hint{opacity:.75;font-size:14px;margin-top:8px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eee;font-size:12px;margin-bottom:8px}
+    .small{font-size:12px;opacity:.8}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:1px solid #ddd;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div>
+      <div class="badge">DEBUG</div>
+      <h1>正在為你連接 WhatsApp…</h1>
+      <div id="chosen" class="small">待選擇連結</div>
+      <p class="hint">如未自動跳轉，請點此備用連結（會新分頁開啟）：</p>
+      <p><a id="fallback" href="#" class="btn" rel="noopener" target="_blank">開啟 WhatsApp</a></p>
+      <p class="small">技巧：開啟開發者工具（F12）查看 console log，確認事件是否已送出。</p>
+    </div>
+  </div>
+
+  <script>
+    // Debug 參數
+    const DELAY_MS = 1200; // 延遲時間（ms）；測試時較長，確保事件送達
+    const EVENT_ID = 'tw-q1c3c-qiev1'; // 你的事件 ID
+    const LINKS = [
+      "https://wa.me/85268837643",
+      "https://wa.me/85295648609",
+      "https://wa.me/85266104290",
+      "https://wa.me/85265211659",
+      "https://wa.me/85253812254",
+      "https://wa.me/85267263590"
+    ];
+
+    const sp = new URLSearchParams(location.search);
+    let idx = parseInt(sp.get('force'), 10);
+    if (!Number.isInteger(idx) || idx < 0 || idx >= LINKS.length) {
+      idx = Math.floor(Math.random() * LINKS.length);
+    }
+    const target = LINKS[idx];
+    document.getElementById('fallback').href = target;
+    document.getElementById('chosen').textContent = '已選：' + target + '（索引 ' + idx + '）';
+
+    function fireEvent(){
+      const t0 = performance.now();
+      try {
+        if (typeof twq === 'function') {
+          twq('event', EVENT_ID, { value: 1, currency: 'HKD' });
+          console.log('[DEBUG] Event fired:', EVENT_ID, {value:1, currency:'HKD'}, 'at', new Date().toISOString());
+        } else {
+          console.warn('[DEBUG] twq not available; base pixel may not be loaded.');
+        }
+      } catch (e) {
+        console.error('[DEBUG] Event fire error:', e);
+      }
+      return t0;
+    }
+
+    window.addEventListener('load', function(){
+      const t0 = fireEvent();
+      setTimeout(function(){
+        console.log('[DEBUG] Redirecting to:', target, 'after', DELAY_MS, 'ms');
+        window.location.replace(target);
+      }, DELAY_MS);
+    });
+
+    // 備用按鈕也會送事件
+    document.getElementById('fallback').addEventListener('click', function(){
+      fireEvent();
+    }, {passive:true});
+  </script>
+
+  <noscript>
+    如未自動跳轉，請點此：
+    <a href="https://wa.me/85268837643" rel="noopener" target="_blank">https://wa.me/85268837643</a>
+  </noscript>
+</body>
+</html>
